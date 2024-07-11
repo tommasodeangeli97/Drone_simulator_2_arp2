@@ -1,0 +1,19 @@
+start acquiring from data.txt 
+n_tar: 5  
+redsd2: 10maxx: 132 , maxy: 5 
+maxx: 132 , maxy: 37 
+coord n 0: x(112) y (16)
+coord n 1: x(105) y (5)
+coord n 2: x(96) y (15)
+coord n 3: x(14) y (2)
+coord n 4: x(52) y (26)
+writesd2: 11
+server_pid: 5213 
+recieved 1
+sent 0 xsent 0 y
+sent 1 xsent 1 y
+sent 2 xsent 2 y
+sent 3 xsent 3 y
+sent 4 xsent 4 y
+recieved 2
+sent 5 xsent 5 y

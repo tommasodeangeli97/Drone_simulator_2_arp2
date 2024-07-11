@@ -17,8 +17,7 @@
 #include <stdbool.h>
 #include <time.h>
 
-
-#define TIMEOUT 10
+#define TIMEOUT 20
 
 typedef enum {FALSE=0, TRUE=1} BOOL;
 
@@ -46,8 +45,8 @@ void RegToLog(FILE* fname, const char * message){
 
 void signalhandler(int signo, siginfo_t* info, void* context){
     if(signo == SIGUSR1){
-        FILE* routine = fopen("files/routine.log", "a");
-        if(routine == NULL){
+        FILE* watchlog = fopen("files/watchdog.log", "a");
+        if(watchlog == NULL){
             perror("fopen");
             exit(EXIT_FAILURE);
         }
@@ -55,30 +54,33 @@ void signalhandler(int signo, siginfo_t* info, void* context){
         pid_t pid;
         pid = info->si_pid;
         if(pid == drone_pid){
-            RegToLog(routine, "WATCHDOG : DRONE signal");
+            RegToLog(watchlog, "WATCHDOG : DRONE signal");
             drone_check = TRUE;
         }
         if(pid == keyboard_pid){
-            RegToLog(routine, "WATCHDOG : KEYBOARD signal");
+            RegToLog(watchlog, "WATCHDOG : KEYBOARD signal");
             keyboard_check = TRUE;
         }
         if(pid == server_pid){
-            RegToLog(routine, "WATCHDOG : SERVER signal");
+            RegToLog(watchlog, "WATCHDOG : SERVER signal");
             server_check = TRUE;
         }
         if(pid == obstacles_pid){
-            RegToLog(routine, "WATCHDOG : OBSTACLES signal");
+            RegToLog(watchlog, "WATCHDOG : OBSTACLES signal");
             obstacles_check = TRUE;
         }
         if(pid == target_pid){
-            RegToLog(routine, "WATCHDOG : TARGET signal");
+            RegToLog(watchlog, "WATCHDOG : TARGET signal");
             target_check = TRUE;
         }
-        fclose(routine);
+        fclose(watchlog);
     }
     if(signo == SIGUSR2){
         printf("terminating the watchdog");
         kill(server_pid, SIGINT);
+        kill(target_pid, SIGINT);
+        kill(obstacles_pid, SIGINT);
+        kill(keyboard_pid, SIGINT);
         exit(EXIT_FAILURE);
     }
 }
@@ -87,6 +89,8 @@ int main(int argc, char* argv[]){
 
     FILE* routine = fopen("files/routine.log", "a");
     FILE* error = fopen("files/error.log", "a");
+    FILE* watchlog = fopen("files/watchdog.log", "a");
+    //FILE* pidlog = fopen("files/pidlog.log", "a");
     if(error == NULL){
         perror("fopen");
         exit(EXIT_FAILURE);
@@ -95,10 +99,19 @@ int main(int argc, char* argv[]){
         perror("fopen");
         exit(EXIT_FAILURE);
     }
+    if(watchlog == NULL){
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+    /*if(pidlog == NULL){
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }*/
 
     RegToLog(routine, "WATCHDOG : start");
 
     struct sigaction sa;
+    //memset(&sa, 0, sizeof(sa));
     sa.sa_flags = SA_SIGINFO;
     sa.sa_sigaction = signalhandler;
 
@@ -119,13 +132,15 @@ int main(int argc, char* argv[]){
     char* inport_key = argv[3];
     char* inport_obstacles = argv[4];
     char* inport_target = argv[5];
-    drone_pid = atoi(inport_drone);
     server_pid = atoi(inport_serv);
+    drone_pid = atoi(inport_drone);
     keyboard_pid = atoi(inport_key);
     obstacles_pid = atoi(inport_obstacles);
     target_pid = atoi(inport_target);
-
+    //fprintf(pidlog, "server_pid:%d\ndrone_pid:%d\nkeyboard_pid:%d\nobstacles_pid:%d\ntarget_pid:%d", server_pid, drone_pid, keyboard_pid, obstacles_pid, target_pid);
+    
     while(1){  //it checks if the processes are working sending the SIGUSR1 to all
+        //time_t t = time(NULL);
 
         server_check = FALSE;
         drone_check = FALSE;
@@ -189,7 +204,7 @@ int main(int argc, char* argv[]){
             exit(EXIT_FAILURE);
         }
         else
-            printf("WATCHDOG : SERVER recieved signal");
+            fprintf(watchlog, "WATCHDOG : SERVER recieved signal");
 
         if(drone_check == FALSE){
             if(kill(server_pid, SIGUSR2) == -1){
@@ -215,7 +230,7 @@ int main(int argc, char* argv[]){
             exit(EXIT_FAILURE);
         }
         else
-            printf("WATCHDOG : DRONE recieved signal");
+            fprintf(watchlog,"WATCHDOG : DRONE recieved signal");
         
         if(keyboard_check == FALSE){
             if(kill(server_pid, SIGUSR2) == -1){
@@ -241,11 +256,65 @@ int main(int argc, char* argv[]){
             exit(EXIT_FAILURE);
         }
         else
-            printf("WATCHDOG : KEYBOARD recieved signal");
+            fprintf(watchlog,"WATCHDOG : KEYBOARD recieved signal");
+        
+        if(obstacles_check == FALSE){
+            if(kill(server_pid, SIGUSR2) == -1){
+                perror("kill server");
+                RegToLog(error, "WATCHDOG : error kill server");
+            }
+            if(kill(drone_pid, SIGUSR2) == -1){
+                perror("kill drone");
+                RegToLog(error, "WATCHDOG : error kill drone");
+            }
+            if(kill(keyboard_pid, SIGUSR2) == -1){
+                perror("kill keyboard");
+                RegToLog(error, "WATCHDOG : error kill keyboard");
+            }
+            if(kill(obstacles_pid, SIGUSR2) == -1){
+                perror("kill obstacles");
+                RegToLog(error, "WATCHDOG : error kill obstacles");
+            }
+            if(kill(target_pid, SIGUSR2) == -1){
+                perror("kill target");
+                RegToLog(error, "WATCHDOG : error kill target");
+            }
+            exit(EXIT_FAILURE);
+        }
+        else
+            fprintf(watchlog,"WATCHDOG : OBSTACLES recieved signal");
+        
+        if(target_check == FALSE){
+            if(kill(server_pid, SIGUSR2) == -1){
+                perror("kill server");
+                RegToLog(error, "WATCHDOG : error kill server");
+            }
+            if(kill(drone_pid, SIGUSR2) == -1){
+                perror("kill drone");
+                RegToLog(error, "WATCHDOG : error kill drone");
+            }
+            if(kill(keyboard_pid, SIGUSR2) == -1){
+                perror("kill keyboard");
+                RegToLog(error, "WATCHDOG : error kill keyboard");
+            }
+            if(kill(obstacles_pid, SIGUSR2) == -1){
+                perror("kill obstacles");
+                RegToLog(error, "WATCHDOG : error kill obstacles");
+            }
+            if(kill(target_pid, SIGUSR2) == -1){
+                perror("kill target");
+                RegToLog(error, "WATCHDOG : error kill target");
+            }
+            exit(EXIT_FAILURE);
+        }
+        else
+            fprintf(watchlog,"WATCHDOG : TARGET recieved signal");
 
     }
 
     fclose(error);
     fclose(routine);
+    fclose(watchlog);
+    //fclose(pidlog);
     return 0;
 }

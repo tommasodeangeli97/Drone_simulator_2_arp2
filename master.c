@@ -56,11 +56,16 @@ int main(int argc, char* argv[]){
 
     FILE* routine = fopen("files/routine.log", "a");
     FILE* error = fopen("files/error.log", "w");
+    FILE* pidlog = fopen("files/pidlog.log", "a");
     if(error == NULL){
         perror("fopen");
         exit(EXIT_FAILURE);
     }
     if(routine == NULL){
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
+    if(pidlog == NULL){
         perror("fopen");
         exit(EXIT_FAILURE);
     }
@@ -117,29 +122,29 @@ int main(int argc, char* argv[]){
     sprintf(piperd3, "%d", pipe_sd3[0]);
     sprintf(pipewr3, "%d", pipe_sd3[1]);
 
-    int pipe_sd4[2]; //pipe from server to obstacles and target
+    int pipe_sd4[2]; //pipe from server to obstacles 
     if(pipe(pipe_sd4) == -1){
         perror("error in pipe_sd4");
         RegToLog(error, "MASTER : error in opening pipe_sd4");
     }
 
-    char piperd4[10]; //readable pipe from server to obstacles and target
-    char pipewr4[10]; //writtable pipe from server to obstacles and target
+    char piperd4[10]; //readable pipe from server to obstacles 
+    char pipewr4[10]; //writtable pipe from server to obstacles 
     
     sprintf(piperd4, "%d", pipe_sd4[0]);
     sprintf(pipewr4, "%d", pipe_sd4[1]);
 
     //process path
     char * drone_path[] = {"./drone", piperd, piperd3, pipewr, NULL};
-    char * key_path[] = {"./keyboard", pipewr3, NULL};
-    char * server_path[] = {"./server", pipewr, piperd, piperd1, piperd2, pipewr4, piperd3, NULL};
-    char * obstacles_path[] = {"./obstacles", pipewr1, piperd4, NULL};
-    char * target_path[] = {"./target", pipewr2, piperd4, NULL};
+    char * key_path[] = {"./keyboard", pipewr3, piperd3, piperd4, NULL};
+    char * server_path[] = {"./server", pipewr, piperd, pipewr1, piperd1, pipewr2, piperd2, pipewr4, NULL};
+    char * obstacles_path[] = {"./obstacles", pipewr1, piperd1, NULL};
+    char * target_path[] = {"./target", pipewr2, piperd2, NULL};
 
     int i = 0;
     char button;
 
-    while(i < 2){  //just gives the initial information for the application
+    /*while(i < 2){  //just gives the initial information for the application
         if(i == 0){
             printf("\t\tWELCOME TO DRONE SIMULATOR BY Tommaso De Angeli\n\n");
             printf("\t\tfirst assignment of Advance and Robot Programming\n\n");
@@ -170,7 +175,7 @@ int main(int argc, char* argv[]){
                 
         }
         
-    }
+    }*/
 
     //execute the programs
     server = spawn("./server", server_path);
@@ -185,6 +190,20 @@ int main(int argc, char* argv[]){
     usleep(500000);
     
     pid_t pids[] = {server, drone, key, obst, target};
+    /*fprintf(pidlog, "server_pid:%d\ndrone_pid:%d\nkeyboard_pid:%d\nobstacles_pid:%d\ntarget_pid:%d", server, drone, key, obst, target);
+    fflush(pidlog);
+
+    kill(server, 34);
+    usleep(500000);
+    kill(drone, 34);
+    usleep(500000);
+    kill(key, 34);
+    usleep(500000);
+    kill(obst, 34);
+    usleep(500000);
+    kill(target, 34);
+    usleep(500000);*/
+
     char pidsstring[5][50];
 
     //insert all pids inside the pidsstring
@@ -196,6 +215,21 @@ int main(int argc, char* argv[]){
     char* watch_path[] = {"./watchdog", pidsstring[0], pidsstring[1], pidsstring[2], pidsstring[3], pidsstring[4], NULL};
     sleep(1);
     watchdog = spawn("./watchdog", watch_path);
+    usleep(500000);
+
+    fprintf(pidlog, "server_pid:%d\ndrone_pid:%d\nkeyboard_pid:%d\nobstacles_pid:%d\ntarget_pid:%d", server, drone, key, obst, target);
+    fflush(pidlog);
+
+    kill(server, 34);
+    usleep(500000);
+    kill(drone, 34);
+    usleep(500000);
+    kill(key, 34);
+    usleep(500000);
+    kill(obst, 34);
+    usleep(500000);
+    kill(target, 34);
+    usleep(500000);
 
     //wait the finish of all the processes
     for(int n = 0; n < 6; n++){
@@ -212,11 +246,12 @@ int main(int argc, char* argv[]){
     close(pipe_sd2[1]);
     close(pipe_sd3[0]);
     close(pipe_sd3[1]);
-    close(pipe_sd4[0]);
-    close(pipe_sd4[1]);
+    //close(pipe_sd4[0]);
+    //close(pipe_sd4[1]);
     //close the file
     fclose(error);
     fclose(routine);
+    fclose(pidlog);
 
     return 0;
 }

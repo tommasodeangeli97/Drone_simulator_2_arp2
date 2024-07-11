@@ -1,553 +1,124 @@
-Sat Jun  1 12:49:20 2024
- : KAYBOARD : start
-
-Thu Jun  6 15:10:55 2024
- : KAYBOARD : start
-
-Thu Jun  6 15:11:40 2024
- : KAYBOARD : start
-
-Thu Jun  6 15:22:07 2024
- : WATCHDOG : start
-Thu Jun  6 15:22:59 2024
- : KAYBOARD : start
-
-Thu Jun  6 15:51:30 2024
+Thu Jul 11 19:35:59 2024
  : MASTER : started
-Thu Jun  6 16:31:44 2024
- : KAYBOARD : start
-
-Thu Jun  6 16:59:38 2024
- : MASTER : started
-Thu Jun  6 17:20:42 2024
- : WATCHDOG : start
-Fri Jun  7 15:21:38 2024
- : MASTER : started
-Fri Jun  7 17:17:52 2024
- : WATCHDOG : start
-Fri Jun  7 17:24:57 2024
- : WATCHDOG : start
-Fri Jun  7 18:02:46 2024
- : OBSTACLES : start
-
-Fri Jun  7 18:08:54 2024
- : TARGET : start
-
-Mon Jun 10 18:45:31 2024
- : MASTER : started
-Mon Jun 10 18:45:47 2024
+Thu Jul 11 19:35:59 2024
  : SERVER : start
 
-Mon Jun 10 18:45:47 2024
+Thu Jul 11 19:35:59 2024
  : KAYBOARD : start
 
-Mon Jun 10 18:45:48 2024
+Thu Jul 11 19:36:00 2024
  : DRONE : start
 
-Mon Jun 10 18:45:48 2024
+Thu Jul 11 19:36:00 2024
  : OBSTACLES : start
 
-Mon Jun 10 18:45:49 2024
+Thu Jul 11 19:36:01 2024
  : TARGET : start
 
-Mon Jun 10 18:45:51 2024
+Thu Jul 11 19:36:02 2024
  : WATCHDOG : start
 SERVER : started success
-Mon Jun 10 18:45:51 2024
- : WATCHDOG : SERVER signal
 DRONE : started success
-Mon Jun 10 18:45:51 2024
- : WATCHDOG : DRONE signal
 KEYBOARD : command from WATCHDOG
-Mon Jun 10 18:45:51 2024
- : WATCHDOG : KEYBOARD signal
-Mon Jun 10 18:45:51 2024
+Thu Jul 11 19:36:02 2024
  : recieved key
 OBSTACLES : started success
-Mon Jun 10 18:45:51 2024
- : WATCHDOG : OBSTACLES signal
 TARGET : started success
-Mon Jun 10 18:45:51 2024
- : WATCHDOG : TARGET signal
-Mon Jun 10 18:48:52 2024
- : TARGET : start
-
-Mon Jun 10 18:49:06 2024
- : MASTER : started
-Mon Jun 10 18:49:18 2024
- : SERVER : start
-
-Mon Jun 10 18:49:19 2024
- : KAYBOARD : start
-
-Mon Jun 10 18:49:19 2024
- : DRONE : start
-
-Mon Jun 10 18:49:20 2024
- : OBSTACLES : start
-
-Mon Jun 10 18:49:20 2024
- : TARGET : start
-
-Mon Jun 10 18:49:22 2024
- : WATCHDOG : start
 SERVER : started success
-Mon Jun 10 18:49:22 2024
- : WATCHDOG : SERVER signal
 DRONE : started success
-Mon Jun 10 18:49:22 2024
- : WATCHDOG : DRONE signal
 KEYBOARD : command from WATCHDOG
-Mon Jun 10 18:49:22 2024
+Thu Jul 11 19:36:22 2024
  : recieved key
-Mon Jun 10 18:49:22 2024
- : WATCHDOG : KEYBOARD signal
 OBSTACLES : started success
-Mon Jun 10 18:49:22 2024
- : WATCHDOG : OBSTACLES signal
 TARGET : started success
-Mon Jun 10 18:49:22 2024
- : WATCHDOG : TARGET signal
-DRONE : started success
-Mon Jun 10 18:49:34 2024
- : WATCHDOG : DRONE signal
-Mon Jun 10 18:49:34 2024
- : WATCHDOG : KEYBOARD signal
-KEYBOARD : command from WATCHDOG
-OBSTACLES : started success
-Mon Jun 10 18:49:34 2024
- : WATCHDOG : OBSTACLES signal
-Mon Jun 10 18:49:34 2024
+Thu Jul 11 19:36:38 2024
  : recieved key
-TARGET : started success
-Mon Jun 10 18:49:34 2024
- : WATCHDOG : TARGET signal
-Tue Jun 11 14:58:32 2024
- : MASTER : started
-Tue Jun 11 14:58:44 2024
- : SERVER : start
-
-Tue Jun 11 14:58:45 2024
- : KAYBOARD : start
-
-Tue Jun 11 14:58:45 2024
- : DRONE : start
-
-Tue Jun 11 14:58:46 2024
- : OBSTACLES : start
-
-Tue Jun 11 14:58:47 2024
- : TARGET : start
-
-Tue Jun 11 14:58:48 2024
- : WATCHDOG : start
+Thu Jul 11 19:36:40 2024
+ : recieved key
 SERVER : started success
-Tue Jun 11 14:58:48 2024
- : WATCHDOG : SERVER signal
 DRONE : started success
-Tue Jun 11 14:58:48 2024
- : WATCHDOG : DRONE signal
 KEYBOARD : command from WATCHDOG
-Tue Jun 11 14:58:48 2024
- : WATCHDOG : KEYBOARD signal
-Tue Jun 11 14:58:48 2024
+Thu Jul 11 19:36:43 2024
  : recieved key
 OBSTACLES : started success
-Tue Jun 11 14:58:48 2024
- : WATCHDOG : OBSTACLES signal
 TARGET : started success
-Tue Jun 11 14:58:49 2024
- : WATCHDOG : TARGET signal
+Thu Jul 11 19:36:51 2024
+ : recieved key
+Thu Jul 11 19:36:53 2024
+ : recieved key
+Thu Jul 11 19:36:59 2024
+ : recieved key
+Thu Jul 11 19:37:02 2024
+ : recieved key
+SERVER : started success
+DRONE : started success
+KEYBOARD : command from WATCHDOG
+OBSTACLES : started success
+TARGET : started success
+Thu Jul 11 19:37:06 2024
+ : recieved key
+Thu Jul 11 19:37:09 2024
+ : recieved key
+Thu Jul 11 19:37:17 2024
+ : recieved key
+Thu Jul 11 19:37:19 2024
+ : recieved key
+Thu Jul 11 19:37:24 2024
+ : recieved key
+SERVER : started success
+DRONE : started success
+KEYBOARD : command from WATCHDOG
+OBSTACLES : started success
+TARGET : started success
+Thu Jul 11 19:37:25 2024
+ : recieved key
+Thu Jul 11 19:37:35 2024
+ : recieved key
+Thu Jul 11 19:37:37 2024
+ : recieved key
+Thu Jul 11 19:37:43 2024
+ : recieved key
+SERVER : started success
+DRONE : started success
+KEYBOARD : command from WATCHDOG
+Thu Jul 11 19:37:45 2024
+ : recieved key
+OBSTACLES : started success
+TARGET : started success
+Thu Jul 11 19:37:51 2024
+ : recieved key
+SERVER : started success
+DRONE : started success
+KEYBOARD : command from WATCHDOG
+OBSTACLES : started success
+TARGET : started success
+Thu Jul 11 19:38:20 2024
+ : DRONE : y upper limit
+SERVER : started success
+DRONE : started success
+KEYBOARD : command from WATCHDOG
+OBSTACLES : started success
+TARGET : started success
+Thu Jul 11 19:38:27 2024
+ : DRONE : x lower limit
+Thu Jul 11 19:38:27 2024
+ : DRONE : y lower limit
+Thu Jul 11 19:38:33 2024
+ : DRONE : x lower limit
+Thu Jul 11 19:38:33 2024
+ : DRONE : y lower limit
+SERVER : started success
+DRONE : started success
+KEYBOARD : command from WATCHDOG
+OBSTACLES : started success
+TARGET : started success
+SERVER : started success
+DRONE : started success
+KEYBOARD : command from WATCHDOG
+OBSTACLES : started success
+TARGET : started success
 SERVER : terminating
-Wed Jun 12 17:19:46 2024
- : MASTER : started
-Wed Jun 12 17:19:58 2024
- : SERVER : start
-
-Wed Jun 12 17:19:59 2024
- : KAYBOARD : start
-
-Wed Jun 12 17:19:59 2024
- : DRONE : start
-
-Wed Jun 12 17:20:00 2024
- : OBSTACLES : start
-
-Wed Jun 12 17:20:00 2024
- : TARGET : start
-
-Wed Jun 12 17:20:02 2024
- : WATCHDOG : start
-SERVER : started success
-Wed Jun 12 17:20:02 2024
- : WATCHDOG : SERVER signal
-DRONE : started success
-Wed Jun 12 17:20:02 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Wed Jun 12 17:20:02 2024
- : WATCHDOG : KEYBOARD signal
-Wed Jun 12 17:20:02 2024
- : recieved key
-OBSTACLES : started success
-Wed Jun 12 17:20:02 2024
- : WATCHDOG : OBSTACLES signal
-TARGET : started success
-Wed Jun 12 17:20:02 2024
- : WATCHDOG : TARGET signal
-SERVER : started success
-Wed Jun 12 17:20:12 2024
- : WATCHDOG : SERVER signal
-DRONE : started success
-Wed Jun 12 17:20:12 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Wed Jun 12 17:20:12 2024
- : WATCHDOG : KEYBOARD signal
-Wed Jun 12 17:20:12 2024
- : recieved key
-OBSTACLES : started success
-Wed Jun 12 17:20:12 2024
- : WATCHDOG : OBSTACLES signal
-TARGET : started success
-Wed Jun 12 17:20:12 2024
- : WATCHDOG : TARGET signal
-SERVER : terminating
-Wed Jun 12 17:39:07 2024
- : MASTER : started
-Wed Jun 12 17:39:19 2024
- : SERVER : start
-
-Wed Jun 12 17:39:19 2024
- : KAYBOARD : start
-
-Wed Jun 12 17:39:20 2024
- : DRONE : start
-
-Wed Jun 12 17:39:20 2024
- : OBSTACLES : start
-
-Wed Jun 12 17:39:21 2024
- : TARGET : start
-
-Wed Jun 12 17:39:22 2024
- : WATCHDOG : start
-SERVER : started success
-Wed Jun 12 17:39:22 2024
- : WATCHDOG : SERVER signal
-DRONE : started success
-Wed Jun 12 17:39:22 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Wed Jun 12 17:39:22 2024
- : WATCHDOG : KEYBOARD signal
-Wed Jun 12 17:39:22 2024
- : recieved key
-OBSTACLES : started success
-Wed Jun 12 17:39:22 2024
- : WATCHDOG : OBSTACLES signal
-TARGET : started success
-Wed Jun 12 17:39:22 2024
- : WATCHDOG : TARGET signal
-DRONE : started success
-Wed Jun 12 17:39:33 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Wed Jun 12 17:39:33 2024
- : WATCHDOG : KEYBOARD signal
-Wed Jun 12 17:39:33 2024
- : recieved key
-OBSTACLES : started success
-Wed Jun 12 17:39:33 2024
- : WATCHDOG : OBSTACLES signal
-TARGET : started success
-Wed Jun 12 17:39:33 2024
- : WATCHDOG : TARGET signal
-Wed Jun 12 17:49:02 2024
- : TARGET : start
-
-Wed Jun 12 17:49:11 2024
- : MASTER : started
-Wed Jun 12 17:49:29 2024
- : SERVER : start
-
-Wed Jun 12 17:49:29 2024
- : KAYBOARD : start
-
-Wed Jun 12 17:49:30 2024
- : DRONE : start
-
-Wed Jun 12 17:49:30 2024
- : OBSTACLES : start
-
-Wed Jun 12 17:49:31 2024
- : TARGET : start
-
-Wed Jun 12 17:49:32 2024
- : WATCHDOG : start
-SERVER : started success
-Wed Jun 12 17:49:32 2024
- : WATCHDOG : SERVER signal
-DRONE : started success
-Wed Jun 12 17:49:32 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Wed Jun 12 17:49:32 2024
- : WATCHDOG : KEYBOARD signal
-OBSTACLES : started success
-Wed Jun 12 17:49:32 2024
- : recieved key
-Wed Jun 12 17:49:32 2024
- : WATCHDOG : OBSTACLES signal
-TARGET : started success
-Wed Jun 12 17:49:32 2024
- : WATCHDOG : TARGET signal
-Wed Jun 12 17:50:16 2024
- : TARGET : start
-
-Wed Jun 12 17:51:21 2024
- : MASTER : started
-Wed Jun 12 17:51:32 2024
- : MASTER : started
-Wed Jun 12 17:51:38 2024
- : SERVER : start
-
-Wed Jun 12 17:51:38 2024
- : KAYBOARD : start
-
-Wed Jun 12 17:51:39 2024
- : DRONE : start
-
-Wed Jun 12 17:51:39 2024
- : OBSTACLES : start
-
-Wed Jun 12 17:51:40 2024
- : TARGET : start
-
-Wed Jun 12 17:51:42 2024
- : WATCHDOG : start
-SERVER : started success
-Wed Jun 12 17:51:42 2024
- : WATCHDOG : SERVER signal
-Wed Jun 12 17:51:42 2024
- : WATCHDOG : DRONE signal
-DRONE : started success
-KEYBOARD : command from WATCHDOG
-Wed Jun 12 17:51:42 2024
- : WATCHDOG : KEYBOARD signal
-OBSTACLES : started success
-Wed Jun 12 17:51:42 2024
- : WATCHDOG : OBSTACLES signal
-Wed Jun 12 17:51:42 2024
- : recieved key
-TARGET : started success
-Wed Jun 12 17:51:42 2024
- : WATCHDOG : TARGET signal
-DRONE : started success
-Wed Jun 12 17:51:53 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Wed Jun 12 17:51:53 2024
- : recieved key
-Wed Jun 12 17:51:53 2024
- : WATCHDOG : KEYBOARD signal
-OBSTACLES : started success
-Wed Jun 12 17:51:54 2024
- : WATCHDOG : OBSTACLES signal
-TARGET : started success
-Wed Jun 12 17:51:54 2024
- : WATCHDOG : TARGET signal
-Wed Jun 12 18:01:22 2024
- : TARGET : start
-
-Wed Jun 12 18:01:40 2024
- : MASTER : started
-Wed Jun 12 18:01:45 2024
- : SERVER : start
-
-Wed Jun 12 18:01:46 2024
- : KAYBOARD : start
-
-Wed Jun 12 18:01:46 2024
- : DRONE : start
-
-Wed Jun 12 18:01:47 2024
- : OBSTACLES : start
-
-Wed Jun 12 18:01:47 2024
- : TARGET : start
-
-Wed Jun 12 18:01:49 2024
- : WATCHDOG : start
-SERVER : started success
-Wed Jun 12 18:01:49 2024
- : WATCHDOG : SERVER signal
-DRONE : started success
-Wed Jun 12 18:01:49 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Wed Jun 12 18:01:49 2024
- : WATCHDOG : KEYBOARD signal
-Wed Jun 12 18:01:49 2024
- : recieved key
-OBSTACLES : started success
-Wed Jun 12 18:01:49 2024
- : WATCHDOG : OBSTACLES signal
-TARGET : started success
-Wed Jun 12 18:01:49 2024
- : WATCHDOG : TARGET signal
-DRONE : started success
-Wed Jun 12 18:02:00 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Wed Jun 12 18:02:00 2024
- : recieved key
-Wed Jun 12 18:02:00 2024
- : WATCHDOG : KEYBOARD signal
-OBSTACLES : started success
-Wed Jun 12 18:02:00 2024
- : WATCHDOG : OBSTACLES signal
-TARGET : started success
-Wed Jun 12 18:02:00 2024
- : WATCHDOG : TARGET signal
-Thu Jun 13 14:56:13 2024
- : OBSTACLES : start
-
-Thu Jun 13 14:56:37 2024
- : TARGET : start
-
-Thu Jun 13 15:21:44 2024
- : OBSTACLES : start
-
-Thu Jun 13 15:23:33 2024
- : OBSTACLES : start
-
-Thu Jun 13 15:38:44 2024
- : TARGET : start
-
-Thu Jun 13 15:40:59 2024
- : OBSTACLES : start
-
-Thu Jun 13 15:42:09 2024
- : TARGET : start
-
-Thu Jun 13 15:45:30 2024
- : MASTER : started
-Thu Jun 13 15:45:36 2024
- : SERVER : start
-
-Thu Jun 13 15:45:37 2024
- : KAYBOARD : start
-
-Thu Jun 13 15:45:37 2024
- : DRONE : start
-
-Thu Jun 13 15:45:38 2024
- : OBSTACLES : start
-
-Thu Jun 13 15:45:39 2024
- : TARGET : start
-
-Thu Jun 13 15:45:40 2024
- : WATCHDOG : start
-SERVER : started success
-Thu Jun 13 15:45:40 2024
- : WATCHDOG : SERVER signal
-DRONE : started success
-Thu Jun 13 15:45:40 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Thu Jun 13 15:45:40 2024
- : recieved key
-Thu Jun 13 15:45:40 2024
- : WATCHDOG : KEYBOARD signal
-OBSTACLES : started success
-Thu Jun 13 15:45:40 2024
- : WATCHDOG : OBSTACLES signal
-TARGET : started success
-Thu Jun 13 15:45:40 2024
- : WATCHDOG : TARGET signal
-Thu Jun 13 15:47:25 2024
- : OBSTACLES : start
-
-Thu Jun 13 15:47:37 2024
- : MASTER : started
-Thu Jun 13 15:47:43 2024
- : SERVER : start
-
-Thu Jun 13 15:47:43 2024
- : KAYBOARD : start
-
-Thu Jun 13 15:47:44 2024
- : DRONE : start
-
-Thu Jun 13 15:47:44 2024
- : OBSTACLES : start
-
-Thu Jun 13 15:47:45 2024
- : TARGET : start
-
-Thu Jun 13 15:47:46 2024
- : WATCHDOG : start
-SERVER : started success
-Thu Jun 13 15:47:46 2024
- : WATCHDOG : SERVER signal
-DRONE : started success
-Thu Jun 13 15:47:46 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Thu Jun 13 15:47:46 2024
- : recieved key
-Thu Jun 13 15:47:46 2024
- : WATCHDOG : KEYBOARD signal
-OBSTACLES : started success
-Thu Jun 13 15:47:46 2024
- : WATCHDOG : OBSTACLES signal
-TARGET : started success
-Thu Jun 13 15:47:46 2024
- : WATCHDOG : TARGET signal
-DRONE : started success
-Thu Jun 13 15:47:57 2024
- : WATCHDOG : DRONE signal
-Thu Jun 13 15:47:57 2024
- : WATCHDOG : KEYBOARD signal
-KEYBOARD : command from WATCHDOG
-Thu Jun 13 15:47:57 2024
- : recieved key
-TARGET : started success
-Thu Jun 13 15:47:59 2024
- : WATCHDOG : TARGET signal
-Thu Jun 13 16:04:55 2024
- : WATCHDOG : start
-Thu Jun 13 16:10:22 2024
- : MASTER : started
-Thu Jun 13 16:10:37 2024
- : MASTER : started
-Thu Jun 13 16:10:42 2024
- : SERVER : start
-
-Thu Jun 13 16:10:43 2024
- : KAYBOARD : start
-
-Thu Jun 13 16:10:43 2024
- : DRONE : start
-
-Thu Jun 13 16:10:44 2024
- : OBSTACLES : start
-
-Thu Jun 13 16:10:45 2024
- : TARGET : start
-
-Thu Jun 13 16:10:46 2024
- : WATCHDOG : start
-DRONE : started success
-Thu Jun 13 16:10:47 2024
- : WATCHDOG : DRONE signal
-KEYBOARD : command from WATCHDOG
-Thu Jun 13 16:10:47 2024
- : recieved key
-Thu Jun 13 16:10:47 2024
- : WATCHDOG : KEYBOARD signal
-TARGET : started success
-Thu Jun 13 16:10:48 2024
- : WATCHDOG : TARGET signal
+OBSTACLES : terminating
+DRONE : terminating
+DRONE : terminating
+TARGET : terminating

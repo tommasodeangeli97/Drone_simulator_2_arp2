@@ -1,0 +1,19 @@
+start acquiring from data.txt 
+n_obbst: 5  
+readsd1: 8  
+maxx: 132 , maxy: 5 
+maxx: 132 , maxy: 37 
+coord n 0: x(128) y (21)
+coord n 1: x(91) y (13)
+coord n 2: x(19) y (26)
+coord n 3: x(55) y (12)
+coord n 4: x(64) y (1)
+writesd1: 9 
+server_pid: 5213 
+recieved 1
+sent 0 xsent 0 y
+sent 1 xsent 1 y
+sent 2 xsent 2 y
+sent 3 xsent 3 y
+sent 4 xrecieved 2
+sent 4 y

@@ -19,7 +19,12 @@
 #include <ncurses.h>
 #include <semaphore.h>
 
-#define MAX_LINE_LENGHT 100
+#define MAX_LINE_LENGHT 256
+
+bool sigint_rec = FALSE;
+int ok = 0;
+
+pid_t server_pid;
 
 //function to write on the files
 void RegToLog(FILE* fname, const char * message){
@@ -46,9 +51,26 @@ void signalhandler(int signo, siginfo_t* info, void* contex){
     if(signo == SIGUSR1){  //SIGUSR1 
         FILE* routine = fopen("files/routine.log", "a");
         watch_pid = info->si_pid;  //initialisation watchdog's pid
-        fprintf(routine, "%s\n", "OBSTACLES : started success");
-        kill(watch_pid, SIGUSR1);
-        fclose(routine);
+        if(watch_pid == server_pid){
+            FILE* obstlog = fopen("files/obstacles.log", "a");
+            if(ok == 0){
+                ok++;
+                fprintf(obstlog, "recieved 1\n");
+                fflush(obstlog);
+            }
+            else if(ok > 0){
+                ok = 0;
+                fprintf(obstlog, "recieved 2\n");
+                fflush(obstlog);
+            }
+            fclose(obstlog);
+            fclose(routine);
+        }
+        else{
+            fprintf(routine, "%s\n", "OBSTACLES : started success");
+            kill(watch_pid, SIGUSR1);
+            fclose(routine);
+        }
     }
 
     if(signo == SIGUSR2){
@@ -56,6 +78,62 @@ void signalhandler(int signo, siginfo_t* info, void* contex){
         fprintf(routine, "%s\n", "OBSTACLES : program terminated by WATCHDOG");
         fclose(routine);
         exit(EXIT_FAILURE);
+    }
+
+    if(signo == SIGINT){
+        printf("obstacles terminating return 0");
+        FILE* routine = fopen("files/routine.log", "a");
+        fprintf(routine, "%s\n", "OBSTACLES : terminating");
+        fclose(routine);
+        sigint_rec = TRUE;
+    }
+
+    if(signo == 34){
+        
+        FILE* obstlog = fopen("files/obstacles.log", "a");
+
+        int fd;
+        const char* logfile = "files/pidlog.log";
+        //const char* search = "server_pid:%d";
+        char pidline[MAX_LINE_LENGHT];
+        fd = open(logfile, O_RDONLY);
+        if(fd == -1){
+            perror("fp opening");
+            fprintf(obstlog, "error in fd");
+            exit(EXIT_FAILURE);
+        }
+
+        int lock_file = flock(fd, LOCK_SH);
+        if(lock_file == -1){
+            perror("failed to lock the file pid");
+            fprintf(obstlog, "error in lock");
+            exit(EXIT_FAILURE);
+        }
+
+        FILE* f = fdopen(fd, "r");
+        
+        while(fgets(pidline, sizeof(pidline), f) != NULL){
+            char label[MAX_LINE_LENGHT];
+            int value;
+            if(sscanf(pidline, "%[^:]:%d", label, &value) == 2){
+                if(strcmp(label, "server_pid") == 0){
+                    server_pid = value;
+                    break;
+                }
+            }
+            else{
+                fprintf(obstlog, "problems in the pid acquisation");
+            }
+        }
+
+        int unlock_file = flock(fd, LOCK_UN);
+        if(unlock_file == -1){
+            perror("failed to unlock the file pid");
+        }
+        fclose(f);
+        close(fd);
+        fprintf(obstlog, "server_pid: %d \n", server_pid);
+        fclose(obstlog);
     }
 }
 
@@ -90,6 +168,7 @@ int main(int argc, char* argv[]){
 
     FILE* routine = fopen("files/routine.log", "a");
     FILE* error = fopen("files/error.log", "a");
+    FILE* obstlog = fopen("files/obstacles.log", "a");
     if(error == NULL){
         perror("fopen");
         exit(EXIT_FAILURE);
@@ -98,15 +177,52 @@ int main(int argc, char* argv[]){
         perror("fopen");
         exit(EXIT_FAILURE);
     }
+    if(obstlog == NULL){
+        perror("fopen");
+        exit(EXIT_FAILURE);
+    }
     RegToLog(routine, "OBSTACLES : start\n");
 
+    /*int fd;
+    const char* logfile = "files/pidlog.log";
+    const char* search = "server_pid:%d";
+    char pidline[MAX_LINE_LENGHT];
+    fd = open(logfile, O_RDONLY);
+    if(fd == -1){
+        perror("fp opening");
+        RegToLog(error, "OBSTACLES: error in opening fd");
+        exit(EXIT_FAILURE);
+    }
+    FILE* f = fdopen(fd, "r");
+    int lock_file = flock(fileno(f), LOCK_EX);
+    if(lock_file == -1){
+        perror("failed to lock the file pid");
+        RegToLog(error, "OBSTACLES; error in lock the fail");
+        exit(EXIT_FAILURE);
+    }
+
+    while(fgets(pidline, sizeof(pidline), f)){
+        strcpy(pidline, search);
+        if(strcmp(pidline, search) == 0){
+            fscanf(f, "server_pid:%d", &server_pid);
+            break;
+        }
+    }
+
+    int unlock_file = flock(fileno(f), LOCK_UN);
+    if(unlock_file == -1){
+        perror("failed to unlock the file pid");
+    }
+    fclose(f);
+    fprintf(obstlog, "server_pid: %d \n", server_pid);*/
+
     //semaphore 
-    sem_t* sm_sem;
+    /*sem_t* sm_sem;
     sm_sem = sem_open("/sm_sem1", 0);
     if(sm_sem == SEM_FAILED){
         RegToLog(error, "OBSTACLES : semaphore faild");
         perror("semaphore");
-    }
+    }*/
 
     struct sigaction sa;  //initialize sigaction
     sa.sa_flags = SA_SIGINFO;  //use sigaction field instead of signalhandler
@@ -122,54 +238,96 @@ int main(int argc, char* argv[]){
         RegToLog(error, "OBSTACLES : error in sigaction()");
         exit(EXIT_FAILURE);
     }
+    if(sigaction(SIGINT, &sa, NULL) == -1){
+        perror("sigaction");
+        RegToLog(error, "OBSTACLES : error in sigaction()");
+        exit(EXIT_FAILURE);
+    }
+    if(sigaction(34, &sa, NULL) == -1){
+        perror("sigaction");
+        RegToLog(error, "OBSTACLES : error in sigaction()");
+        exit(EXIT_FAILURE);
+    }
 
-    FILE* fp;
-    const char* filename = "data.txt";
-    const char* target_name = "N_OBSTACLES:";
+    fprintf(obstlog, "start acquiring from data.txt \n");
+    fflush(obstlog);
+
+    int fp;
+    const char* filename = "files/data.txt";
     char line[MAX_LINE_LENGHT];
 
-    fp = fopen(filename, "r");
-    if(fp == NULL){
+    fp = open(filename, O_RDONLY);
+    if(fp == -1){
         perror("fp opening");
         RegToLog(error, "OBSTACLES: error in opening fp");
         exit(EXIT_FAILURE);
     }
-
-    while(fgets(line, sizeof(line), fp)){
-        line[strcspn(line, "\n")] = '\0';
-        if(strcmp(line, target_name) == 0){
-            sscanf(line+strlen(target_name), "%d", &ncoord);
-            break;
+    int lock_file = flock(fp, LOCK_SH);
+    if(lock_file == -1){
+        perror("failed to lock the file pid");
+        RegToLog(error, "OBSTACLES; error in lock the failmsmsms");
+        exit(EXIT_FAILURE);
+    }
+    FILE* file = fdopen(fp, "r");
+    
+    while(fgets(line, sizeof(line), file) != NULL){
+        char label[MAX_LINE_LENGHT];
+        int value;
+        if(sscanf(line, "%[^:]:%d", label, &value) == 2){
+            if(strcmp(label, "N_OBSTACLES") == 0){
+                ncoord = value;
+                break;
+            }
+        }
+        else{
+            fprintf(obstlog, "problems in the pid acquisation");
         }
     }
 
+    int unlock_file = flock(fp, LOCK_UN);
+    if(unlock_file == -1){
+        perror("failed to unlock the file pid");
+    }
+
+    fclose(file);
+    fprintf(obstlog, "n_obbst: %d  \n", ncoord);
+    fflush(obstlog);
+    //server_pid = atoi(argv[3]);
+
     //pipe to recieve the max_x and the max_y
-    int readsd4;
+    int readsd1;
     int varre;
     int maxx, maxy;
-    sscanf(argv[2], "%d", &readsd4);
+    readsd1 = atoi(argv[2]);
+    fprintf(obstlog, "readsd1: %d  \n", readsd1);
+    fflush(obstlog);
 
-    sem_wait(sm_sem);
-    varre = read(readsd4, &maxx, sizeof(int));
+    //sem_wait(sm_sem);
+    varre = read(readsd1, &maxx, sizeof(int));
     if( varre == -1){
         perror("readsd");
         RegToLog(error, "OBSTACLES : error in readsd 1");
     }
+    fprintf(obstlog, "maxx: %d , maxy: %d \n", maxx, maxy);
+    fflush(obstlog);
     //sem_post(sm_sem);
     sleep(1);
     //sem_wait(sm_sem);
-    varre = read(readsd4, &maxy, sizeof(int));
+    varre = read(readsd1, &maxy, sizeof(int));
     if( varre == -1){
         perror("readsd");
         RegToLog(error, "OBSTACLES : error in readsd 2");
     }
-    sem_post(sm_sem);
+    sleep(1);
+    fprintf(obstlog, "maxx: %d , maxy: %d \n", maxx, maxy);
+    fflush(obstlog);
+    //sem_post(sm_sem);
 
     srand(time(NULL));  //initialise random seed
     int points[2][ncoord];
     for(int i = 0; i<2; i++){
         for(int j=0; j<ncoord; j++){
-            if(i=0)
+            if(i == 0)
                 points[i][j] = rand() %maxx;  //random column
             else
                 points[i][j] = rand() %maxy;  //random random raw
@@ -177,32 +335,101 @@ int main(int argc, char* argv[]){
     }
 
     while(point_feseability(points, maxx, maxy)){
-        for(int i = 0; i<2; i++){
-            for(int j=0; j<ncoord; j++){
-                if(i=0)
-                    points[i][j] = rand() %maxx;  //random column
+        for(int ii = 0; ii<2; ii++){
+            for(int jj=0; jj<ncoord; jj++){
+                if(ii == 0)
+                    points[ii][jj] = rand() %maxx;  //random column
                 else
-                    points[i][j] = rand() %maxy;  //random random raw
+                    points[ii][jj] = rand() %maxy;  //random random raw
             }
         }
     }
 
+    for(int jjj = 0; jjj < ncoord; jjj++){
+        fprintf(obstlog, "coord n %d: x(%d) y (%d)\n", jjj, points[0][jjj], points[1][jjj]);
+        fflush(obstlog);
+    }
+
     //pipe to share the position with the server
     int writesd1;
-    sscanf(argv[1], "%d", &writesd1);
-    for(int i=0; i<ncoord; i++){
+    writesd1 = atoi(argv[1]);
+    fprintf(obstlog, "writesd1: %d \n", writesd1);
+    fflush(obstlog);
+
+    /*for(int i=0; i<ncoord; i++){
+        sem_wait(sm_sem);
         write(writesd1, &points[0][i], sizeof(int));
-        fsync(writesd1);
+        //fsync(writesd1);
+        sem_post(sm_sem);
         sleep(1);
     }
     for(int j =0; j<ncoord; j++){
+        sem_wait(sm_sem);
         write(writesd1, &points[1][j], sizeof(int));
-        fsync(writesd1);
+        //fsync(writesd1);
+        sem_post(sm_sem);
         sleep(1);
+    }*/
+    //int check = 0;
+    int i =0;
+    while(!sigint_rec){
+        i = 0;
+        while(ok > 0){
+            write(writesd1, &points[0][i], sizeof(int));
+            fsync(writesd1);
+            sleep(1);
+            fprintf(obstlog, "sent %d x", i);
+            fflush(obstlog);
+
+            write(writesd1, &points[1][i], sizeof(int));
+            fsync(writesd1);
+            sleep(1);
+            fprintf(obstlog, "sent %d y\n", i);
+            fflush(obstlog);
+            i++;
+        }
+
+        sleep(1);
+
+        /*while(ok > 0 && ok <= ((ncoord*2)-2)){
+            if(ok == check)
+                sleep(1);
+            else if(ok > check && ok <= ncoord){
+                fprintf(obstlog, "coord x %d: %d \n", check, points[0][check]);
+                fflush(obstlog);
+                write(writesd1, &points[0][check], sizeof(int));
+                fsync(writesd1);
+                check++;
+                sleep(1);
+            }
+            else if(ok > check && ok > ncoord){
+                fprintf(obstlog, "coord y %d: %d \n", i, points[1][i]);
+                fflush(obstlog);
+                write(writesd1, &points[1][i], sizeof(int));
+                fsync(writesd1);
+                i++;
+                check++;
+                sleep(1);
+            }
+            else if(ok < check){
+                RegToLog(error, "TARGET: error in counters");
+                ok = -1;
+            }
+        }
+        if(ok > ((ncoord*2)-2))
+            kill(server_pid, SIGUSR1);
+        
+        ok = 0;
+        sleep(1);*/
     }
 
-    sem_close(sm_sem);
-    fclose(fp);
-    sleep(2);
+    //sem_close(sm_sem);
+    close(writesd1);
+    close(readsd1);
+    //fclose(fp);
+    fclose(obstlog);
+    fclose(routine);
+    fclose(error);
+    sleep(1);
     return 0;
 }

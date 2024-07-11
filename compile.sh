@@ -5,14 +5,14 @@ if [ $? -eq 0 ]; then
         echo "errore compilazione MASTER"
     fi
 
-cc -o "server" "server.c" "-lncurses" "-lm"
+cc -o "server" "server.c" "-lncurses" -lm
 if [ $? -eq 0 ]; then
         echo "compilazione di SERVER completata"
     else
         echo "errore compilazione SERVER"
     fi
 
-cc -o "drone" "drone.c" "-lm"
+cc -o "drone" "drone.c" -lm
 if [ $? -eq 0 ]; then
         echo "compilazione di DRONE completata"
     else
@@ -45,4 +45,11 @@ if [ $? -eq 0 ]; then
         echo "compilazione di TARGET completata"
     else
         echo "errore compilazione TARGET"
+    fi
+
+cc -o "window" "window.c" "-lncurses" -lm
+if [ $? -eq 0 ]; then
+        echo "compilazione di WINDOW completata"
+    else
+        echo "errore compilazione WINDOW"
     fi
