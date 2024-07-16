@@ -39,6 +39,10 @@ QUIT 'q'
 
 ## Overview
 
+
+https://github.com/user-attachments/assets/917ee4b3-059f-4f8f-ba47-d88c1b00ed11
+
+
 ## Installation
 To properly install the application assure you to have installe *konsole* and *ncurses* on your computer
 ```
