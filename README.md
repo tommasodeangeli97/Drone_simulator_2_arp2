@@ -48,7 +48,7 @@ $ sudo apt install libncurses-dev
 
 then clone the repository on your pc
 ```
-$ git clone https://github.com/tommasodeangeli97/Drone-simulator_arp1.git
+$ git clone https://github.com/tommasodeangeli97/Drone_simulator_2_arp2.git
 ```
 
 by the *konsole* terminal go inside the folder
