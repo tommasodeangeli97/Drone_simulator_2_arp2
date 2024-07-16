@@ -90,7 +90,7 @@ int main(int argc, char* argv[]){
     FILE* routine = fopen("files/routine.log", "a");
     FILE* error = fopen("files/error.log", "a");
     FILE* watchlog = fopen("files/watchdog.log", "a");
-    //FILE* pidlog = fopen("files/pidlog.log", "a");
+    
     if(error == NULL){
         perror("fopen");
         exit(EXIT_FAILURE);
@@ -103,15 +103,10 @@ int main(int argc, char* argv[]){
         perror("fopen");
         exit(EXIT_FAILURE);
     }
-    /*if(pidlog == NULL){
-        perror("fopen");
-        exit(EXIT_FAILURE);
-    }*/
 
     RegToLog(routine, "WATCHDOG : start");
 
     struct sigaction sa;
-    //memset(&sa, 0, sizeof(sa));
     sa.sa_flags = SA_SIGINFO;
     sa.sa_sigaction = signalhandler;
 
@@ -137,10 +132,8 @@ int main(int argc, char* argv[]){
     keyboard_pid = atoi(inport_key);
     obstacles_pid = atoi(inport_obstacles);
     target_pid = atoi(inport_target);
-    //fprintf(pidlog, "server_pid:%d\ndrone_pid:%d\nkeyboard_pid:%d\nobstacles_pid:%d\ntarget_pid:%d", server_pid, drone_pid, keyboard_pid, obstacles_pid, target_pid);
     
     while(1){  //it checks if the processes are working sending the SIGUSR1 to all
-        //time_t t = time(NULL);
 
         server_check = FALSE;
         drone_check = FALSE;
@@ -312,9 +305,9 @@ int main(int argc, char* argv[]){
 
     }
 
+    //close the files
     fclose(error);
     fclose(routine);
     fclose(watchlog);
-    //fclose(pidlog);
     return 0;
 }

@@ -46,10 +46,3 @@ if [ $? -eq 0 ]; then
     else
         echo "errore compilazione TARGET"
     fi
-
-cc -o "window" "window.c" "-lncurses" -lm
-if [ $? -eq 0 ]; then
-        echo "compilazione di WINDOW completata"
-    else
-        echo "errore compilazione WINDOW"
-    fi

@@ -21,17 +21,15 @@
 
 #define MAX_LINE_LENGHT 256
 #define form '%'
-#define MAXF 25
+#define MAXF 2
 
 bool sigint_rec = 0;
-//bool tk = 0, obstt = 0;
 pid_t key_pid, target_pid, obst_pid, drone_pid;
 
 //quantities for the proximity and repulsive forces
 float rho0 = 8; //repulsive force range
 float rho2 = 2; //takes obstacles and target range
 float eta = 40;
-float csi = 5;
 
 typedef struct{  //shared memory
     int forces[2];
@@ -41,6 +39,7 @@ typedef struct{  //shared memory
     int target;
 } SharedMemory;
 
+//function to take the max
 int max(int a, int b){
     if(a>b)
         return a;
@@ -67,43 +66,24 @@ void RegToLog(FILE* fname, const char * message){
     }
 }
 
-int spawn(const char * program, char ** arg_list){
-    FILE* error = fopen("files/error.log", "a");
-    pid_t child_pid = fork();
-    if(child_pid != 0)
-        return child_pid;
-    else{
-        execvp(program, arg_list);
-        perror("exec failed");
-        RegToLog(error, "SERVER: execvp failed");
-        exit(EXIT_FAILURE);
-    }
-    fclose(error);
-}
-
 pid_t watch_pid = -1;  //declaration pid of the watchdog
 void signalhandler(int signo, siginfo_t* info, void* contex){
     if(signo == SIGUSR1){  //SIGUSR1 
         FILE* routine = fopen("files/routine.log", "a");
+        FILE* error = fopen("files/error.log", "a");
         watch_pid = info->si_pid;  //initialisation watchdog's pid
-        if(watch_pid == key_pid){
-            char* window_path[] = {"konsole", "-e", "./window", NULL};
-            pid_t window_pid;
-            window_pid = spawn("./window", window_path);
-            usleep(500000);
-            waitpid(window_pid, NULL, WNOHANG);
+        if(watch_pid == -1){
+            fprintf(error, "%s\n", "DRONE : error in recieving pid");
             fclose(routine);
+            fclose(error);
+            perror("recieving pid drone");
+            exit(EXIT_FAILURE);
         }
-        /*else if(watch_pid == target_pid){
-            tk = 1;
-        }
-        else if(watch_pid == obst_pid){
-            obstt = 1;
-        }*/
         else{
             fprintf(routine, "%s\n", "SERVER : started success");
             kill(watch_pid, SIGUSR1);
             fclose(routine);
+            fclose(error);
         }
     }
 
@@ -121,16 +101,12 @@ void signalhandler(int signo, siginfo_t* info, void* contex){
         sigint_rec = 1;
     }
 
-    if(signo == 34){
+    if(signo == 34){  //signal to collect the pids of the others processes
 
         FILE* serverlog = fopen("files/server.log", "a");
 
         int fd;
         const char* logfile = "files/pidlog.log";
-        //const char* search = "keyboard_pid:%d";
-        //const char* search2 = "target_pid:%d";
-        //const char* search3 = "obstacles_pid:%d";
-        //const char* search4 = "drone_pid:%d";
         char pidline[MAX_LINE_LENGHT];
         fd = open(logfile, O_RDONLY);
         if(fd == -1){
@@ -188,6 +164,7 @@ void signalhandler(int signo, siginfo_t* info, void* contex){
     }
 }
 
+//function to check if the obstacles and the targets are coincident
 int check_ostar(int ox, int oy, int tx, int ty){
     if(ox == tx && oy == ty){
         FILE* ferr = fopen("files/error.log", "a");
@@ -199,6 +176,7 @@ int check_ostar(int ox, int oy, int tx, int ty){
         return 0;
 }
 
+//function to check id the drone is near to a target
 int near(int cx1, int cy1, int cx2, int cy2){
     float rho = sqrt(pow(cx1-cx2, 2)+pow(cy1-cy2, 2));
     if(rho < rho2)
@@ -206,6 +184,7 @@ int near(int cx1, int cy1, int cx2, int cy2){
     return 0;
 }
 
+//function to check if the drone is near to an obstacle and evalueates the new force acting on the drone
 float near_obst(int cx1, int cy1, int cx2, int cy2, float v){
     float rho = sqrt(pow(cx1-cx2, 2)+pow(cy1-cy2, 2));
     float theta = atan2(cy1-cy2, cx1-cx2);
@@ -229,6 +208,7 @@ int main(int argc, char* argv[]){
     FILE* routine = fopen("files/routine.log", "a");
     FILE* error = fopen("files/error.log", "a");
     FILE* serverlog = fopen("files/server.log", "a");
+
     if(error == NULL){
         perror("fopen");
         exit(EXIT_FAILURE);
@@ -248,60 +228,9 @@ int main(int argc, char* argv[]){
         init_pair(1, COLOR_BLUE, COLOR_WHITE);  //define the window color
         init_pair(2, COLOR_RED, COLOR_WHITE); //define the obstacle color
         init_pair(3, COLOR_GREEN, COLOR_WHITE); //define the target color
-        fprintf(serverlog, "has colors\n");
-        fflush(serverlog);
+        //fprintf(serverlog, "has colors\n");
+        //fflush(serverlog);
     }
-
-    /*int fd;
-    const char* logfile = "files/pidlog.log";
-    const char* search = "keyboard_pid:%d";
-    const char* search2 = "target_pid:%d";
-    const char* search3 = "obstacles_pid:%d";
-    const char* search4 = "drone_pid:%d";
-    char pidline[MAX_LINE_LENGHT];
-    fd = open(logfile, O_RDONLY);
-    if(fd == -1){
-        perror("fp opening");
-        RegToLog(error, "TARGET: error in opening fd");
-        exit(EXIT_FAILURE);
-    }
-    FILE* f = fdopen(fd, "r");
-    int lock_file = flock(fileno(f), LOCK_EX);
-    if(lock_file == -1){
-        perror("failed to lock the file pid");
-        RegToLog(error, "SERVER: error in lock");
-        exit(EXIT_FAILURE);
-    }
-
-    int b = 0;
-    while(fgets(pidline, sizeof(pidline), f)){
-        //strcpy(pidline, search);
-        if(strcmp(pidline, search) == 0){
-            fscanf(f, "keyboard_pid:%d", &key_pid);
-            b++;
-        }
-        if(strcmp(pidline, search2) == 0){
-            fscanf(f, "target_pid:%d", &target_pid);
-            b++;
-        }
-        if(strcmp(pidline, search3) == 0){
-            fscanf(f, "obstacles_pid:%d", &obst_pid);
-            b++;
-        }
-        if(strcmp(pidline, search4) == 0){
-            fscanf(f, "drone_pid:%d", &drone_pid);
-            b++;
-        }
-        if(b>=4)
-            break;
-    }
-
-    int unlock_file = flock(fileno(f), LOCK_UN);
-    if(unlock_file == -1){
-        perror("failed to unlock the file pid");
-    }
-    fclose(f);
-    fprintf(serverlog, "keyboard_pid:%d , target_pid:%d , obstacles_pid:%d , drone_pid:%d\n", key_pid, target_pid, obst_pid, drone_pid);*/
 
     SharedMemory *sm;  //shared memory pointer
     //shared memory opening and mapping
@@ -372,53 +301,48 @@ int main(int argc, char* argv[]){
     writesd = atoi(argv[1]);
     writesd2 = atoi(argv[5]);
     writesd1 = atoi(argv[3]);
-    fprintf(serverlog, "wwrittesd: %d , writeeesd11: %d , writeee2: %d \n", writesd, writesd1, writesd2);
-    fflush(serverlog);
+    //fprintf(serverlog, "wwrittesd: %d , writeeesd11: %d , writeee2: %d \n", writesd, writesd1, writesd2);
+    //fflush(serverlog);
 
     int max_x, max_y;
     getmaxyx(stdscr, max_y, max_x);  //takes the max number of rows and colons
-    fprintf(serverlog, "maxx: %d , maxy: %d \n", max_x, max_y);
-    fflush(serverlog);
-    //sem_wait(sm_sem);
+    //fprintf(serverlog, "maxx: %d , maxy: %d \n", max_x, max_y);
+    //fflush(serverlog);
+    
     write(writesd, &max_x, sizeof(int));
     fsync(writesd);
-    //sem_post(sm_sem);
+    
     sleep(1);
-    //sem_wait(sm_sem);
+    
     write(writesd, &max_y, sizeof(int));
     fsync(writesd);
-    //sem_post(sm_sem);
+    
     sleep(1);
-    fprintf(serverlog, "ok 1  \n");
-    fflush(serverlog);
-    //sem_wait(sm_sem);
+    //fprintf(serverlog, "ok 1  \n");
+    //fflush(serverlog);
+    
     write(writesd2, &max_x, sizeof(int));
     fsync(writesd2);
-    //sem_post(sm_sem);
+    
     sleep(1);
-    //sem_wait(sm_sem);
+    
     write(writesd2, &max_y, sizeof(int));
     fsync(writesd2);
     sleep(1);
-    fprintf(serverlog, "ok 2  \n");
-    fflush(serverlog);
-    //sem_post(sm_sem);
+    //fprintf(serverlog, "ok 2  \n");
+    //fflush(serverlog);
+    
     write(writesd1, &max_x, sizeof(int));
     fsync(writesd1);
-    //sem_post(sm_sem);
+    
     sleep(1);
-    //sem_wait(sm_sem);
+    
     write(writesd1, &max_y, sizeof(int));
     fsync(writesd1);
-    //sem_post(sm_sem);
+    
     sleep(1);
-    fprintf(serverlog, "ok 3  \n");
-    fflush(serverlog);
-
-    /*WINDOW *win = newwin(max_y, max_x, 0, 0);  //creats the window
-    box(win, 0, 0);  //adds the borders
-    wbkgd(win, COLOR_PAIR(1));  //sets the color of the window
-    wrefresh(win);  //prints and refreshes the window*/
+    //fprintf(serverlog, "ok 3  \n");
+    //fflush(serverlog);
 
     srand(time(NULL));  //initialise random seed
 
@@ -436,27 +360,24 @@ int main(int argc, char* argv[]){
     if(droneposy >= max_y)
         droneposy = max_y-1;
 
-    fprintf(serverlog, "posx: %d , posy: %d \n", droneposx, droneposy);
-    fflush(serverlog);
+    //fprintf(serverlog, "posx: %d , posy: %d \n", droneposx, droneposy);
+    //fflush(serverlog);
 
-    //update the drone position
+    //sends the drone position to the drone process
     write(writesd, &droneposx, sizeof(int));
-    //RegToLog(error, "SERVER: PROVA ");
     fsync(writesd);
     sleep(1);
     write(writesd, &droneposy, sizeof(int));
-    //RegToLog(error, "SERVER: PROVA 2");
     fsync(writesd);
     sleep(1);
 
-    int readsd; // readsd3;
+    int readsd;
     int varre;
     readsd = atoi(argv[2]);
-    fprintf(serverlog, "readsd: %d\n", readsd);
-    fflush(serverlog);
-    //sscanf(argv[7], "%d", &readsd3);
+    //fprintf(serverlog, "readsd: %d\n", readsd);
+    //fflush(serverlog);
 
-    //takes the number of target and obstacles from the file
+    //takes the number of targets and obstacles from the file
     int fp;
     const char* filename = "files/data.txt";
     int n_obst, n_tar, at = 0;
@@ -508,64 +429,17 @@ int main(int argc, char* argv[]){
     }
 
     fclose(file);
-    fprintf(serverlog, "nobst: %d , ntar: %d \n", n_obst, n_tar);
-    fflush(serverlog);
-    //store the obstacles and target position
+    //fprintf(serverlog, "nobst: %d , ntar: %d \n", n_obst, n_tar);
+    //fflush(serverlog);
+
+    //variables to store the obstacles and target position
     int obst[2][n_obst];
     int target[2][n_tar];
-    
     int readsd1, readsd2;
     readsd1 = atoi(argv[4]);
     readsd2 = atoi(argv[6]);
-    fprintf(serverlog, "readsd1: %d , readsd2: %d\n", readsd1, readsd2);
-    fflush(serverlog);
-
-    //int l = 0, m = 0;
-    /*while(!obstt){
-        if(l < n_obst){
-            kill(obst_pid, SIGUSR1);
-            do{
-                varre = read(readsd1, &obst[0][l], sizeof(int));
-                RegToLog(error, "prova obst 1");
-                sleep(1);
-            }while(varre == -1 && errno == EINTR);
-            l++;  
-        }      
-        else if(l >= n_obst && l <= ((n_obst*2)-2)){
-            kill(obst_pid, SIGUSR1);
-            do{
-                varre = read(readsd1, &obst[1][l], sizeof(int));
-                RegToLog(error, "prova obst 2");
-                sleep(1);
-            }while(varre == -1 && errno == EINTR);
-            l++;
-        }
-    }
-    l = 0;
-    while(!tk){
-        if(l < n_tar){
-            kill(target_pid, SIGUSR1);
-            do{
-                varre = read(readsd2, &target[0][l], sizeof(int));
-                RegToLog(error, "prova tar 3");
-                sleep(1);
-            }while(varre == -1 && errno == EINTR);
-            l++;  
-        }      
-        else if(l >= n_tar && l <= ((n_tar*2)-2)){
-            kill(target_pid, SIGUSR1);
-            do{
-                varre = read(readsd2, &target[1][l], sizeof(int));
-                RegToLog(error, "prova tar 4");
-                sleep(1);
-            }while(varre == -1 && errno == EINTR);
-            l++;
-        }
-    }
-    l = 0;*/
-    //fd_set read_fd;
-    //FD_ZERO(&read_fd);
-    //int ok = 0, ok2 = 0;
+    //fprintf(serverlog, "readsd1: %d , readsd2: %d\n", readsd1, readsd2);
+    //fflush(serverlog);
 
     WINDOW *win = newwin(max_y, max_x, 0, 0);  //creats the window
     box(win, 0, 0);  //adds the borders
@@ -575,8 +449,10 @@ int main(int argc, char* argv[]){
     kill(obst_pid, SIGUSR1);
     sleep(1);
 
-    fprintf(serverlog, "taking the obstacles\n");
-    fflush(serverlog);
+    //fprintf(serverlog, "taking the obstacles\n");
+    //fflush(serverlog);
+
+    //takes the obstacles and send the signal to stop
     for(int m = 0; m < n_obst; m++){
         varre = -1;
         while(varre == -1){
@@ -590,8 +466,8 @@ int main(int argc, char* argv[]){
             sleep(1);
         }
 
-        fprintf(serverlog, "obst coord %d --> x %d  y %d\n", m, obst[0][m], obst[1][m]);
-        fflush(serverlog);
+        //fprintf(serverlog, "obst coord %d --> x %d  y %d\n", m, obst[0][m], obst[1][m]);
+        //fflush(serverlog);
     }
     kill(obst_pid, SIGUSR1);
     sleep(1);
@@ -599,8 +475,10 @@ int main(int argc, char* argv[]){
     kill(target_pid, SIGUSR1);
     sleep(1);
 
-    fprintf(serverlog, "taking the targets\n");
-    fflush(serverlog);
+    //fprintf(serverlog, "taking the targets\n");
+    //fflush(serverlog);
+
+    //takes the targets and send the signal to stop
     for(int l = 0; l < n_tar; l++){
         varre = -1;
         while(varre == -1){
@@ -614,108 +492,13 @@ int main(int argc, char* argv[]){
             sleep(1);
         }
 
-        fprintf(serverlog, "tar coord %d --> x %d  y %d\n", l, target[0][l], target[1][l]);
-        fflush(serverlog);
+        //fprintf(serverlog, "tar coord %d --> x %d  y %d\n", l, target[0][l], target[1][l]);
+        //fflush(serverlog);
     }
     
     kill(target_pid, SIGUSR1);
     sleep(1);
     
-    /*while(!ok){
-        FD_SET(readsd1, &read_fd);
-        FD_SET(readsd2, &read_fd);
-        int sel, h = 0;
-        //struct timeval timeout;
-        //timeout.tv_sec = 0;
-        //timeout.tv_usec = 100000;  //0.1 sec
-        do{
-            int max_fd = (readsd1 > readsd2) ? readsd1 : readsd2;
-            sel = select(max_fd+1, &read_fd, NULL, NULL, NULL);
-            //RegToLog(error, "mannaggia");
-            sleep(1);
-        }while(sel == -1 && errno == EINTR);
-        if(sel == -1){
-            perror("error in select");
-            RegToLog(error, "SERVER: error in select");
-            exit(EXIT_FAILURE);
-        }
-        else if(sel == 0){
-            perror("select");
-            RegToLog(error, "SERVER: error in select main");
-            RegToLog(serverlog, "SERVER: error in select main");
-            exit(EXIT_FAILURE);
-        }
-        else if(sel>0){
-            l = 0;
-            m = 0;
-            if(FD_ISSET(readsd1, &read_fd)){
-                while(!obstt){
-                    if(l < n_obst){
-                        kill(obst_pid, SIGUSR1);
-                        sleep(1);
-                        //do{
-                        varre = read(readsd1, &obst[0][l], sizeof(int));
-                        RegToLog(error, "prova obst 1");
-                            //sleep(1);
-                        //}while(varre == -1 && errno == EINTR);
-                        fprintf(serverlog, "coord obst x %d: %d \n", l, obst[0][l]);
-                        l++;  
-                    }      
-                    else if(l >= n_obst && l <= ((n_obst*2)-2)){
-                        kill(obst_pid, SIGUSR1);
-                        sleep(1);
-                        //do{
-                        varre = read(readsd1, &obst[1][m], sizeof(int));
-                        RegToLog(error, "prova obst 2");
-                            //sleep(1);
-                        //}while(varre == -1 && errno == EINTR);
-                        fprintf(serverlog, "coord obst y %d: %d \n", m, obst[1][m]);
-                        l++;
-                        m++;
-                    }
-                }
-                if(ok == 0 && ok2 == 0){
-                    ok2++;
-                }
-                else if(ok == 0 && ok2 > 0){
-                    ok++;
-                }
-            }
-            if(FD_ISSET(readsd2, &read_fd)){
-                while(!tk){
-                    if(l < n_tar){
-                        kill(target_pid, SIGUSR1);
-                        sleep(1);
-                        //do{
-                        varre = read(readsd2, &target[0][l], sizeof(int));
-                        RegToLog(error, "prova tar 3");
-                            //sleep(1);
-                        //}while(varre == -1 && errno == EINTR);
-                        fprintf(serverlog, "coord tar x %d: %d \n", l, target[0][l]);
-                        l++;  
-                    }      
-                    else if(l >= n_tar && l <= ((n_tar*2)-2)){
-                        kill(target_pid, SIGUSR1);
-                        sleep(1);
-                        //do{
-                        varre = read(readsd2, &target[1][l], sizeof(int));
-                        RegToLog(error, "prova tar 4");
-                            //sleep(1);
-                        //}while(varre == -1 && errno == EINTR);
-                        fprintf(serverlog, "coord tar y %d: %d \n", m, target[1][m]);
-                        l++;
-                        m++;
-                    }
-                }
-                if(ok == 0 && ok2 == 0){
-                    ok2++;
-                }
-                else if(ok == 0 && ok2 > 0){
-                    ok++;
-                }
-            }
-        }
-    }*/
     //check if the pionts are sovrapposed and print the obstacles and target
     int n = max(n_obst, n_tar);
     int arr_c[2][n];
@@ -758,8 +541,9 @@ int main(int argc, char* argv[]){
     
     int r = 0, score = 0, obt = 0, trt = 0;
     int memo[2][1];
-    while(!sigint_rec){  //print the drone in the new position given by the shared memory and delet the old one
+    while(!sigint_rec){  //print the drone in the new position and delet the old one
         if(r >0){
+            //deleting the old drone's podition
             wattr_on(win, COLOR_PAIR(1), NULL);
             mvwprintw(win, droneposy, droneposx, " ");  //prints the drone
             wattr_off(win, COLOR_PAIR(1), NULL);
@@ -768,49 +552,22 @@ int main(int argc, char* argv[]){
             r--;
         }
 
-        //acquire position and forces
-        //sem_wait(sm_sem);
-        /*varre = read(readsd3, &droneforx, sizeof(int));
-        if( varre == -1){
-            perror("readsd");
-            RegToLog(error, "SERVER : error in readsd3 3");
-        }
-        //sem_post(sm_sem);
-        sleep(1);
-        //sem_wait(sm_sem);
-        varre = read(readsd3, &dronefory, sizeof(int));
-        if( varre == -1){
-            perror("readsd");
-            RegToLog(error, "SERVER : error in readsd3 4");
-        }*/
-        //sem_post(sm_sem);
-        //sem_wait(sm_sem);
-        //do{
+        //taking the new drone position
         varre = -1;
         while(varre == -1){
             varre = read(readsd, &droneposx, sizeof(int));
-            //RegToLog(error, "prova 1");
             sleep(1);
         }
-        //}while(varre == -1 && errno == EINTR);
+        
         varre = -1;
-        //sem_post(sm_sem);
-        //sleep(1);
-        //sem_wait(sm_sem);
-        //do{
-        while (varre == -1){
-               
+        
+        while (varre == -1){   
             varre = read(readsd, &droneposy, sizeof(int));
-            //RegToLog(error, "prova 2");
             sleep(1);
         }
-        //}while(varre == -1 && errno == EINTR);
         
-        
-        fprintf(serverlog, "posx: %d ,, posy: %d \n", droneposx, droneposy);
-        fflush(serverlog);
-        //sem_post(sm_sem);
-        //sleep(1);
+        //fprintf(serverlog, "posx: %d ,, posy: %d \n", droneposx, droneposy);
+        //fflush(serverlog);
 
         sem_wait(sm_sem);
         sm->score = score;
@@ -819,16 +576,16 @@ int main(int argc, char* argv[]){
         sem_post(sm_sem);
 
         wattr_on(win, COLOR_PAIR(1), NULL);
-        //mvwprintw(win, max_y, 0, "score:%d", score);
         mvwprintw(win, droneposy, droneposx, "%c", form);  //prints the drone
         wattr_off(win, COLOR_PAIR(1), NULL);
         wrefresh(win);
 
-        //check if the drone is near to an obstacles, in that case the repulse forse act
         sem_wait(sm_sem);
         float vx = sm->vel[0];
         float vy = sm->vel[1];
         sem_post(sm_sem);
+
+        //check if the drone is near to an obstacles, in that case the repulse forse act and the forces are shared whit the keyboard
         for(int f = 0; f<n_obst; f++){
             float a = near_obst(droneposx, droneposy, obst[0][f], obst[1][f], vx);
             float b = near_obst(droneposx, droneposy, obst[0][f], obst[1][f], vy);
@@ -836,8 +593,8 @@ int main(int argc, char* argv[]){
                 a = ceil(a);
                 b = ceil(b);
                 int writesd4 = atoi(argv[7]);
-                fprintf(serverlog, "writesd4:%d , a:%f , b:%f", writesd4, a, b);
-                fflush(serverlog);
+                //fprintf(serverlog, "writesd4:%d , a:%f , b:%f", writesd4, a, b);
+                //fflush(serverlog);
 
                 kill(key_pid, SIGUSR1);
                 sleep(1);
@@ -853,7 +610,7 @@ int main(int argc, char* argv[]){
             }
         }
         
-        //check if the drone pursuit a gol or touch a obstacles
+        //check if the drone pursuit a gol or touch a obstacles and stores in the memo double array the witch target or obstacle is involved
         for(int c =0; c<n; c++){
             if(near(droneposx, droneposy, obst[0][c], obst[1][c]) && c<n_obst){
                 wattr_on(win, COLOR_PAIR(2), NULL);
@@ -908,7 +665,7 @@ int main(int argc, char* argv[]){
             memo[1][0] = -1;     
         }
 
-
+        //takes the values from the shared memory and prints them on top of the window
         sem_wait(sm_sem);
         double velx = sm->vel[0];
         double vely = sm->vel[1];
@@ -920,12 +677,6 @@ int main(int argc, char* argv[]){
         sem_post(sm_sem);
         wattr_on(win, COLOR_PAIR(1), NULL);
         mvwprintw(win, 0, 0, "fx:%d fy:%d vx:%f vy:%f target missing:%d obstacles taken:%d SCORE:%d",forx,fory,velx,vely,tartaken,obstmanc,sco);
-        /*mvwprintw(win2, 2, 1, "force on y: %d", fory);
-        mvwprintw(win2, 3, 1, "velocity on x: %f", velx);
-        mvwprintw(win2, 4, 1, "velocity on y: %f", vely);
-        mvwprintw(win2, 6, 1, "target missing: %d", tartaken);
-        mvwprintw(win2, 7, 1, "obstacles: %d", obstmanc);
-        mvwprintw(win2, 9, 1, "TOTAL SCORE: %d", sco);*/
         wattr_off(win, COLOR_PAIR(2), NULL);
         wrefresh(win);
 
@@ -933,7 +684,7 @@ int main(int argc, char* argv[]){
         r++;
     }
 
-    //routine to close the shared memory, the files and the semaphore
+    //routine to close the shared memory, the files, the pipes and the semaphore
     if(shm_unlink(shm_name) == 1){
         printf("okok");
         exit(EXIT_FAILURE);
@@ -955,7 +706,5 @@ int main(int argc, char* argv[]){
     fclose(error);
     fclose(routine);
     fclose(serverlog);
-    //fclose(fp);
-
     return 0;
 }

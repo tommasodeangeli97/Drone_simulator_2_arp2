@@ -57,6 +57,7 @@ int main(int argc, char* argv[]){
     FILE* routine = fopen("files/routine.log", "a");
     FILE* error = fopen("files/error.log", "w");
     FILE* pidlog = fopen("files/pidlog.log", "a");
+
     if(error == NULL){
         perror("fopen");
         exit(EXIT_FAILURE);
@@ -122,14 +123,14 @@ int main(int argc, char* argv[]){
     sprintf(piperd3, "%d", pipe_sd3[0]);
     sprintf(pipewr3, "%d", pipe_sd3[1]);
 
-    int pipe_sd4[2]; //pipe from server to obstacles 
+    int pipe_sd4[2]; //pipe from server to keyboard in case the drone is too close to an obstacle
     if(pipe(pipe_sd4) == -1){
         perror("error in pipe_sd4");
         RegToLog(error, "MASTER : error in opening pipe_sd4");
     }
 
-    char piperd4[10]; //readable pipe from server to obstacles 
-    char pipewr4[10]; //writtable pipe from server to obstacles 
+    char piperd4[10]; //readable pipe from server to keyboard 
+    char pipewr4[10]; //writtable pipe from server to keyboard 
     
     sprintf(piperd4, "%d", pipe_sd4[0]);
     sprintf(pipewr4, "%d", pipe_sd4[1]);
@@ -144,7 +145,7 @@ int main(int argc, char* argv[]){
     int i = 0;
     char button;
 
-    /*while(i < 2){  //just gives the initial information for the application
+    while(i < 2){  //just gives the initial information for the application
         if(i == 0){
             printf("\t\tWELCOME TO DRONE SIMULATOR BY Tommaso De Angeli\n\n");
             printf("\t\tfirst assignment of Advance and Robot Programming\n\n");
@@ -175,7 +176,7 @@ int main(int argc, char* argv[]){
                 
         }
         
-    }*/
+    }
 
     //execute the programs
     server = spawn("./server", server_path);
@@ -190,19 +191,6 @@ int main(int argc, char* argv[]){
     usleep(500000);
     
     pid_t pids[] = {server, drone, key, obst, target};
-    /*fprintf(pidlog, "server_pid:%d\ndrone_pid:%d\nkeyboard_pid:%d\nobstacles_pid:%d\ntarget_pid:%d", server, drone, key, obst, target);
-    fflush(pidlog);
-
-    kill(server, 34);
-    usleep(500000);
-    kill(drone, 34);
-    usleep(500000);
-    kill(key, 34);
-    usleep(500000);
-    kill(obst, 34);
-    usleep(500000);
-    kill(target, 34);
-    usleep(500000);*/
 
     char pidsstring[5][50];
 
@@ -238,6 +226,7 @@ int main(int argc, char* argv[]){
 
     RegToLog(routine, "MASTER : finish");
 
+    //close the pipes
     close(pipe_sd[0]);
     close(pipe_sd[1]);
     close(pipe_sd1[0]);
@@ -246,8 +235,9 @@ int main(int argc, char* argv[]){
     close(pipe_sd2[1]);
     close(pipe_sd3[0]);
     close(pipe_sd3[1]);
-    //close(pipe_sd4[0]);
-    //close(pipe_sd4[1]);
+    close(pipe_sd4[0]);
+    close(pipe_sd4[1]);
+
     //close the file
     fclose(error);
     fclose(routine);

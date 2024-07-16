@@ -88,7 +88,7 @@ void signalhandler(int signo, siginfo_t* info, void* contex){
         sigint_rec = TRUE;
     }
 
-    if(signo == 34){
+    if(signo == 34){  //signal to collect the pids of the others processes
         
         FILE* obstlog = fopen("files/obstacles.log", "a");
 
@@ -138,6 +138,7 @@ void signalhandler(int signo, siginfo_t* info, void* contex){
 }
 
 int ncoord = 0;
+//function to see if the created points are by chance equal
 int point_feseability( int coord[2][ncoord], int maxx, int maxy){
     int coordx[ncoord];
     int coordy[ncoord];
@@ -169,6 +170,7 @@ int main(int argc, char* argv[]){
     FILE* routine = fopen("files/routine.log", "a");
     FILE* error = fopen("files/error.log", "a");
     FILE* obstlog = fopen("files/obstacles.log", "a");
+
     if(error == NULL){
         perror("fopen");
         exit(EXIT_FAILURE);
@@ -182,47 +184,6 @@ int main(int argc, char* argv[]){
         exit(EXIT_FAILURE);
     }
     RegToLog(routine, "OBSTACLES : start\n");
-
-    /*int fd;
-    const char* logfile = "files/pidlog.log";
-    const char* search = "server_pid:%d";
-    char pidline[MAX_LINE_LENGHT];
-    fd = open(logfile, O_RDONLY);
-    if(fd == -1){
-        perror("fp opening");
-        RegToLog(error, "OBSTACLES: error in opening fd");
-        exit(EXIT_FAILURE);
-    }
-    FILE* f = fdopen(fd, "r");
-    int lock_file = flock(fileno(f), LOCK_EX);
-    if(lock_file == -1){
-        perror("failed to lock the file pid");
-        RegToLog(error, "OBSTACLES; error in lock the fail");
-        exit(EXIT_FAILURE);
-    }
-
-    while(fgets(pidline, sizeof(pidline), f)){
-        strcpy(pidline, search);
-        if(strcmp(pidline, search) == 0){
-            fscanf(f, "server_pid:%d", &server_pid);
-            break;
-        }
-    }
-
-    int unlock_file = flock(fileno(f), LOCK_UN);
-    if(unlock_file == -1){
-        perror("failed to unlock the file pid");
-    }
-    fclose(f);
-    fprintf(obstlog, "server_pid: %d \n", server_pid);*/
-
-    //semaphore 
-    /*sem_t* sm_sem;
-    sm_sem = sem_open("/sm_sem1", 0);
-    if(sm_sem == SEM_FAILED){
-        RegToLog(error, "OBSTACLES : semaphore faild");
-        perror("semaphore");
-    }*/
 
     struct sigaction sa;  //initialize sigaction
     sa.sa_flags = SA_SIGINFO;  //use sigaction field instead of signalhandler
@@ -249,13 +210,14 @@ int main(int argc, char* argv[]){
         exit(EXIT_FAILURE);
     }
 
-    fprintf(obstlog, "start acquiring from data.txt \n");
-    fflush(obstlog);
+    //fprintf(obstlog, "start acquiring from data.txt \n");
+    //fflush(obstlog);
 
     int fp;
     const char* filename = "files/data.txt";
     char line[MAX_LINE_LENGHT];
 
+    //reading from the data.txt file the number of obstacles to create
     fp = open(filename, O_RDONLY);
     if(fp == -1){
         perror("fp opening");
@@ -290,41 +252,39 @@ int main(int argc, char* argv[]){
     }
 
     fclose(file);
-    fprintf(obstlog, "n_obbst: %d  \n", ncoord);
-    fflush(obstlog);
-    //server_pid = atoi(argv[3]);
+    //fprintf(obstlog, "n_obbst: %d  \n", ncoord);
+    //fflush(obstlog);
 
     //pipe to recieve the max_x and the max_y
     int readsd1;
     int varre;
     int maxx, maxy;
     readsd1 = atoi(argv[2]);
-    fprintf(obstlog, "readsd1: %d  \n", readsd1);
-    fflush(obstlog);
+    //fprintf(obstlog, "readsd1: %d  \n", readsd1);
+    //fflush(obstlog);
 
-    //sem_wait(sm_sem);
     varre = read(readsd1, &maxx, sizeof(int));
     if( varre == -1){
         perror("readsd");
         RegToLog(error, "OBSTACLES : error in readsd 1");
     }
-    fprintf(obstlog, "maxx: %d , maxy: %d \n", maxx, maxy);
-    fflush(obstlog);
-    //sem_post(sm_sem);
+    //fprintf(obstlog, "maxx: %d , maxy: %d \n", maxx, maxy);
+    //fflush(obstlog);
+    
     sleep(1);
-    //sem_wait(sm_sem);
+    
     varre = read(readsd1, &maxy, sizeof(int));
     if( varre == -1){
         perror("readsd");
         RegToLog(error, "OBSTACLES : error in readsd 2");
     }
     sleep(1);
-    fprintf(obstlog, "maxx: %d , maxy: %d \n", maxx, maxy);
-    fflush(obstlog);
-    //sem_post(sm_sem);
+    //fprintf(obstlog, "maxx: %d , maxy: %d \n", maxx, maxy);
+    //fflush(obstlog);
 
     srand(time(NULL));  //initialise random seed
     int points[2][ncoord];
+    //creating the points
     for(int i = 0; i<2; i++){
         for(int j=0; j<ncoord; j++){
             if(i == 0)
@@ -334,6 +294,7 @@ int main(int argc, char* argv[]){
         }
     }
 
+    //checking if the points are feasibles
     while(point_feseability(points, maxx, maxy)){
         for(int ii = 0; ii<2; ii++){
             for(int jj=0; jj<ncoord; jj++){
@@ -345,88 +306,45 @@ int main(int argc, char* argv[]){
         }
     }
 
-    for(int jjj = 0; jjj < ncoord; jjj++){
+    /*for(int jjj = 0; jjj < ncoord; jjj++){
         fprintf(obstlog, "coord n %d: x(%d) y (%d)\n", jjj, points[0][jjj], points[1][jjj]);
         fflush(obstlog);
-    }
+    }*/
 
     //pipe to share the position with the server
     int writesd1;
     writesd1 = atoi(argv[1]);
-    fprintf(obstlog, "writesd1: %d \n", writesd1);
-    fflush(obstlog);
+    //fprintf(obstlog, "writesd1: %d \n", writesd1);
+    //fflush(obstlog);
 
-    /*for(int i=0; i<ncoord; i++){
-        sem_wait(sm_sem);
-        write(writesd1, &points[0][i], sizeof(int));
-        //fsync(writesd1);
-        sem_post(sm_sem);
-        sleep(1);
-    }
-    for(int j =0; j<ncoord; j++){
-        sem_wait(sm_sem);
-        write(writesd1, &points[1][j], sizeof(int));
-        //fsync(writesd1);
-        sem_post(sm_sem);
-        sleep(1);
-    }*/
-    //int check = 0;
     int i =0;
+
+    //sending the coordinates untill the server gives back the stop signal
     while(!sigint_rec){
         i = 0;
         while(ok > 0){
             write(writesd1, &points[0][i], sizeof(int));
             fsync(writesd1);
             sleep(1);
-            fprintf(obstlog, "sent %d x", i);
-            fflush(obstlog);
+            //fprintf(obstlog, "sent %d x", i);
+            //fflush(obstlog);
 
             write(writesd1, &points[1][i], sizeof(int));
             fsync(writesd1);
             sleep(1);
-            fprintf(obstlog, "sent %d y\n", i);
-            fflush(obstlog);
+            //fprintf(obstlog, "sent %d y\n", i);
+            //fflush(obstlog);
             i++;
         }
 
         sleep(1);
 
-        /*while(ok > 0 && ok <= ((ncoord*2)-2)){
-            if(ok == check)
-                sleep(1);
-            else if(ok > check && ok <= ncoord){
-                fprintf(obstlog, "coord x %d: %d \n", check, points[0][check]);
-                fflush(obstlog);
-                write(writesd1, &points[0][check], sizeof(int));
-                fsync(writesd1);
-                check++;
-                sleep(1);
-            }
-            else if(ok > check && ok > ncoord){
-                fprintf(obstlog, "coord y %d: %d \n", i, points[1][i]);
-                fflush(obstlog);
-                write(writesd1, &points[1][i], sizeof(int));
-                fsync(writesd1);
-                i++;
-                check++;
-                sleep(1);
-            }
-            else if(ok < check){
-                RegToLog(error, "TARGET: error in counters");
-                ok = -1;
-            }
-        }
-        if(ok > ((ncoord*2)-2))
-            kill(server_pid, SIGUSR1);
-        
-        ok = 0;
-        sleep(1);*/
     }
 
-    //sem_close(sm_sem);
+    //close the pipes
     close(writesd1);
     close(readsd1);
-    //fclose(fp);
+    //close the files
     fclose(obstlog);
     fclose(routine);
     fclose(error);
