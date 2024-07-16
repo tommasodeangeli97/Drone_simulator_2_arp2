@@ -21,3 +21,4 @@ QUIT 'q'
 ```
 
 ## Architecture
+![Slide1](https://github.com/user-attachments/assets/39a474c6-425d-43a7-8c00-ef46c628144a)
