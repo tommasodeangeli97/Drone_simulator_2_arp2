@@ -148,7 +148,7 @@ int main(int argc, char* argv[]){
     while(i < 2){  //just gives the initial information for the application
         if(i == 0){
             printf("\t\tWELCOME TO DRONE SIMULATOR BY Tommaso De Angeli\n\n");
-            printf("\t\tfirst assignment of Advance and Robot Programming\n\n");
+            printf("\t\tsecond assignment of Advance and Robot Programming\n\n");
             printf("press q to stop the simulation or any other button to continue...\n\n\n\n");
             scanf("%c", &button);
             if(button == 'q'){
