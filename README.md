@@ -53,7 +53,7 @@ $ git clone https://github.com/tommasodeangeli97/Drone_simulator_2_arp2.git
 
 by the *konsole* terminal go inside the folder
 ```
-$ cd Drone-simulator_arp1/
+$ cd Drone_simulator_2_arp2/
 ```
 
 make executable the compiler and run it
